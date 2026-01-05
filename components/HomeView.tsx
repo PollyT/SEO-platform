@@ -45,18 +45,26 @@ const HomeView: React.FC<HomeViewProps> = ({ initialTitle, initialDescription, o
 
           <div>
             <label className="block text-sm font-semibold text-slate-700 mb-2">Meta Description</label>
-            <textarea
-              className="w-full px-4 py-3 rounded-xl border border-slate-200 focus:ring-2 focus:ring-indigo-500 focus:border-indigo-500 transition-all outline-none text-slate-800 h-32 resize-none"
-              placeholder="Enter your meta description (optional)..."
-              value={description}
-              onChange={(e) => setDescription(e.target.value)}
-            />
+            <div className="flex gap-2 items-start">
+              <textarea
+                className="flex-1 px-4 py-3 rounded-xl border border-slate-200 focus:ring-2 focus:ring-indigo-500 focus:border-indigo-500 transition-all outline-none text-slate-800 h-32 resize-none"
+                placeholder="Enter your meta description (optional)..."
+                value={description}
+                onChange={(e) => setDescription(e.target.value)}
+              />
+              <button
+                onClick={() => onAnalyze(title, description)}
+                className="bg-slate-800 hover:bg-slate-900 text-white px-6 py-3 rounded-xl font-bold transition-all shadow-lg shadow-slate-200 whitespace-nowrap"
+              >
+                Analyze Description
+              </button>
+            </div>
           </div>
         </div>
 
         <div className="pt-4 border-t border-slate-50">
           <p className="text-xs text-slate-400 text-center">
-            Tip: Click "Analyze Title" to access deep technical analysis, pixel measurement, and keyword verification.
+            Tip: Click "Analyze" on either field to access deep technical analysis, pixel measurement, and keyword verification.
           </p>
         </div>
       </div>

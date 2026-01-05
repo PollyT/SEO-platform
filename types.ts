@@ -5,22 +5,39 @@ export interface SEOSuggestion {
   type: 'keyword-focused' | 'click-worthy' | 'minimalist' | 'branding-forward';
 }
 
+export interface DescriptionSuggestion {
+  text: string;
+  reason: string;
+}
+
 export interface SEOAnalysis {
   score: number;
-  pixelWidthOk: boolean;
-  keywordIncluded: boolean;
+  titleMetrics: {
+    score: number;
+    pixelWidthOk: boolean;
+    keywordIncluded: boolean;
+    measuredPixelWidth: number;
+    improvements: string[];
+    suggestions: SEOSuggestion[];
+  };
+  descriptionMetrics: {
+    score: number;
+    pixelWidthOk: boolean;
+    keywordIncluded: boolean;
+    measuredPixelWidth: number;
+    improvements: string[];
+    suggestions: DescriptionSuggestion[];
+  };
   sentiment: 'positive' | 'negative' | 'neutral';
-  improvements: string[];
-  suggestions: SEOSuggestion[];
   extractedKeywords: string[];
   estimatedCTR: string;
-  measuredPixelWidth?: number;
 }
 
 export interface PageData {
   currentTitle: string;
   currentDescription: string;
   targetKeyword: string;
-  content: string; // Used for Table of Contents
-  currentPixelWidth: number;
+  content: string; 
+  currentTitlePixelWidth: number;
+  currentDescriptionPixelWidth: number;
 }

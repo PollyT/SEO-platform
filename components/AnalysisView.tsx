@@ -31,25 +31,32 @@ const AnalysisView: React.FC<AnalysisViewProps> = ({
   loading, 
   error 
 }) => {
-  const pixelWidth = useMemo(() => measureTextWidth(data.currentTitle), [data.currentTitle]);
+  const titlePixelWidth = useMemo(() => measureTextWidth(data.currentTitle, '18px Arial'), [data.currentTitle]);
+  const descPixelWidth = useMemo(() => measureTextWidth(data.currentDescription, '14px Arial'), [data.currentDescription]);
 
   const handleAnalyzeClick = () => {
-    onAnalyze({ ...data, currentPixelWidth: pixelWidth });
+    onAnalyze({ 
+      ...data, 
+      currentTitlePixelWidth: titlePixelWidth,
+      currentDescriptionPixelWidth: descPixelWidth
+    });
   };
 
-  // Auto-analyze once on load if it's a fresh landing
   useEffect(() => {
-    if (!analysis && !loading && data.currentTitle) {
+    if (!analysis && !loading && (data.currentTitle || data.currentDescription)) {
       handleAnalyzeClick();
     }
   }, []);
 
-  const getStatusColor = () => {
-    if (pixelWidth === 0) return 'bg-slate-200';
-    if (pixelWidth < 200) return 'bg-blue-400';
-    if (pixelWidth <= 580) return 'bg-emerald-500';
-    return 'bg-rose-500';
+  const getWidthStatus = (px: number, limit: number) => {
+    if (px === 0) return { color: 'bg-slate-200', text: 'Empty' };
+    if (px < limit * 0.4) return { color: 'bg-blue-400', text: 'Too Short' };
+    if (px <= limit) return { color: 'bg-emerald-500', text: 'Perfect' };
+    return { color: 'bg-rose-500', text: 'Too Long' };
   };
+
+  const titleStatus = getWidthStatus(titlePixelWidth, 580);
+  const descStatus = getWidthStatus(descPixelWidth, 920);
 
   return (
     <div className="space-y-8 pb-20">
@@ -66,33 +73,11 @@ const AnalysisView: React.FC<AnalysisViewProps> = ({
       <section className="bg-white rounded-3xl shadow-sm border border-slate-100 p-8">
         <div className="mb-8">
           <h2 className="text-2xl font-bold text-slate-900">Deep SEO Analysis</h2>
-          <p className="text-slate-500 mt-1">Refine your technical parameters to get the most accurate AI feedback.</p>
+          <p className="text-slate-500 mt-1">Refine your metadata and technical structure for peak search visibility.</p>
         </div>
 
-        <div className="grid grid-cols-1 md:grid-cols-2 gap-8">
+        <div className="grid grid-cols-1 lg:grid-cols-2 gap-8">
           <div className="space-y-6">
-            <div>
-              <label className="block text-sm font-semibold text-slate-700 mb-2">Current Title</label>
-              <input
-                type="text"
-                className="w-full px-4 py-3 rounded-xl border border-slate-200 focus:ring-2 focus:ring-indigo-500 outline-none text-slate-800"
-                value={data.currentTitle}
-                onChange={(e) => setData({ ...data, currentTitle: e.target.value })}
-              />
-              <div className="mt-3 space-y-2">
-                <div className="flex justify-between text-[10px] font-bold uppercase tracking-wider text-slate-400">
-                  <span>{pixelWidth} px</span>
-                  <span>Limit: 580px</span>
-                </div>
-                <div className="h-1.5 w-full bg-slate-100 rounded-full overflow-hidden">
-                  <div 
-                    className={`h-full transition-all duration-300 ${getStatusColor()}`}
-                    style={{ width: `${Math.min((pixelWidth / 580) * 100, 100)}%` }}
-                  />
-                </div>
-              </div>
-            </div>
-
             <div>
               <label className="block text-sm font-semibold text-slate-700 mb-2">Target Keyword</label>
               <input
@@ -100,24 +85,71 @@ const AnalysisView: React.FC<AnalysisViewProps> = ({
                 className="w-full px-4 py-3 rounded-xl border border-slate-200 focus:ring-2 focus:ring-indigo-500 outline-none text-slate-800"
                 value={data.targetKeyword}
                 onChange={(e) => setData({ ...data, targetKeyword: e.target.value })}
+                placeholder="e.g. 深圳地圖"
               />
+            </div>
+
+            <div className="p-5 bg-slate-50 rounded-2xl border border-slate-100 space-y-6">
+              <div>
+                <label className="block text-xs font-bold uppercase tracking-widest text-slate-400 mb-3">SEO Title</label>
+                <input
+                  type="text"
+                  className="w-full px-4 py-3 rounded-xl border border-slate-200 focus:ring-2 focus:ring-indigo-500 outline-none text-slate-800 text-sm"
+                  value={data.currentTitle}
+                  onChange={(e) => setData({ ...data, currentTitle: e.target.value })}
+                />
+                <div className="mt-3 space-y-2">
+                  <div className="flex justify-between text-[10px] font-bold uppercase tracking-wider text-slate-400">
+                    <span>{titlePixelWidth} px</span>
+                    <span className={titlePixelWidth > 580 ? 'text-rose-500' : 'text-slate-400'}>{titleStatus.text} (Limit: 580px)</span>
+                  </div>
+                  <div className="h-1.5 w-full bg-slate-100 rounded-full overflow-hidden">
+                    <div 
+                      className={`h-full transition-all duration-300 ${titleStatus.color}`}
+                      style={{ width: `${Math.min((titlePixelWidth / 580) * 100, 100)}%` }}
+                    />
+                  </div>
+                </div>
+              </div>
+
+              <div>
+                <label className="block text-xs font-bold uppercase tracking-widest text-slate-400 mb-3">Meta Description</label>
+                <textarea
+                  className="w-full px-4 py-3 rounded-xl border border-slate-200 focus:ring-2 focus:ring-indigo-500 outline-none text-slate-800 text-sm h-24 resize-none"
+                  value={data.currentDescription}
+                  onChange={(e) => setData({ ...data, currentDescription: e.target.value })}
+                />
+                <div className="mt-3 space-y-2">
+                  <div className="flex justify-between text-[10px] font-bold uppercase tracking-wider text-slate-400">
+                    <span>{descPixelWidth} px</span>
+                    <span className={descPixelWidth > 920 ? 'text-rose-500' : 'text-slate-400'}>{descStatus.text} (Limit: 920px)</span>
+                  </div>
+                  <div className="h-1.5 w-full bg-slate-100 rounded-full overflow-hidden">
+                    <div 
+                      className={`h-full transition-all duration-300 ${descStatus.color}`}
+                      style={{ width: `${Math.min((descPixelWidth / 920) * 100, 100)}%` }}
+                    />
+                  </div>
+                </div>
+              </div>
             </div>
 
             <button
               onClick={handleAnalyzeClick}
               disabled={loading}
-              className="w-full bg-indigo-600 text-white py-4 rounded-xl font-bold hover:bg-indigo-700 disabled:opacity-50 transition-all flex items-center justify-center gap-2"
+              className="w-full bg-indigo-600 text-white py-4 rounded-xl font-bold hover:bg-indigo-700 disabled:opacity-50 transition-all flex items-center justify-center gap-2 shadow-lg shadow-indigo-100"
             >
-              {loading ? <div className="w-5 h-5 border-2 border-white/30 border-t-white rounded-full animate-spin" /> : 'Run Full Analysis'}
+              {loading ? <div className="w-5 h-5 border-2 border-white/30 border-t-white rounded-full animate-spin" /> : 'Refresh AI Analysis'}
             </button>
           </div>
 
-          <div>
+          <div className="flex flex-col">
             <label className="block text-sm font-semibold text-slate-700 mb-2">Page Table of Contents</label>
             <textarea
-              className="w-full px-4 py-3 rounded-xl border border-slate-200 focus:ring-2 focus:ring-indigo-500 outline-none text-slate-800 h-64 font-mono text-sm leading-relaxed"
+              className="flex-1 min-h-[400px] w-full px-4 py-3 rounded-xl border border-slate-200 focus:ring-2 focus:ring-indigo-500 outline-none text-slate-800 font-mono text-sm leading-relaxed"
               value={data.content}
               onChange={(e) => setData({ ...data, content: e.target.value })}
+              placeholder="Paste page structure here..."
             />
           </div>
         </div>
@@ -132,7 +164,10 @@ const AnalysisView: React.FC<AnalysisViewProps> = ({
       {loading && (
         <div className="flex flex-col items-center justify-center py-20 space-y-4">
           <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-indigo-600"></div>
-          <p className="text-slate-600 font-medium animate-pulse">Consulting the SEO Oracle...</p>
+          <p className="text-slate-600 font-medium animate-pulse text-center">
+            Deep-analyzing your metadata...<br/>
+            <span className="text-xs text-slate-400 font-normal">Comparing Title & Description with Page Content</span>
+          </p>
         </div>
       )}
 

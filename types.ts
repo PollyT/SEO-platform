@@ -7,7 +7,7 @@ export interface SEOSuggestion {
 
 export interface SEOAnalysis {
   score: number;
-  pixelWidthOk: boolean; // Replaces lengthOk for more accuracy
+  pixelWidthOk: boolean;
   keywordIncluded: boolean;
   sentiment: 'positive' | 'negative' | 'neutral';
   improvements: string[];
@@ -19,7 +19,8 @@ export interface SEOAnalysis {
 
 export interface PageData {
   currentTitle: string;
+  currentDescription: string;
   targetKeyword: string;
-  content: string;
-  currentPixelWidth: number; // Added to pass accurate UI measurement to AI
+  content: string; // Used for Table of Contents
+  currentPixelWidth: number;
 }
